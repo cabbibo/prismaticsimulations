@@ -1,0 +1,558 @@
+<html>
+<body style="margin:0px">
+  <script src="three.min.js"></script>
+
+  <script src="ObjectControls.js"></script>
+
+  <script src="AudioBuffer.js"></script>
+  <script src="AudioController.js"></script>
+  <script src="BufferedAudio.js"></script>
+
+  <script>
+
+
+    var scene, camera, renderer;
+
+    var objectControls;
+    var objects = [];
+  var startPoints = [];
+  var endPoints = [];
+  var pointLengths = [];
+
+    var flowers =[];
+    var page;
+
+    var v1 = new THREE.Vector3();
+    var v2 = new THREE.Vector3();
+    var clock = new THREE.Clock();
+
+    var lights = [];
+
+    var loaded = 0;
+var neededToLoad = 5;
+  //  init();
+  //  animate();
+
+
+      audio  = new AudioController();
+      audio.currentBuffer = 0;
+      //G.audio.mute.gain.value = 0;
+      audio.buffers = {};
+      audio.playbackBuffers = [];
+      audio.gainNodes = [];
+      
+      notes = [];
+
+
+      audio.play = function( buffer , rate , volume ){
+        unlock();
+        audio.currentBuffer += 1;
+        audio.currentBuffer %= audio.playbackBuffers.length;
+        audio.playbackBuffers[audio.currentBuffer].play(buffer,rate,volume);
+      }
+
+       loadAudio( "pure"  , "sounds/b1.mp3" );
+       loadAudio( "pure1" , "sounds/b2.mp3" );
+       loadAudio( "pure2" , "sounds/b3.mp3" );
+       loadAudio( "pure3" , "sounds/b4.mp3" );
+       loadAudio( "pure4" , "sounds/b5.mp3" );
+       loadAudio( "pure5" , "sounds/b6.mp3" );
+       loadAudio( "pure6" , "sounds/b7.mp3" );
+
+       function loadAudio( name , file ){
+     
+          neededToLoad += 1;
+          audio.buffers[name] = new AudioBuffer( audio , file );
+          audio.buffers[name].addLoadEvent( function(){ console.log("audio"); onLoad(); });
+          notes[notes.length] = audio.buffers[name];
+        }
+
+      var iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+var isUnlocked = false;
+function unlock() {
+      
+  //console.log("MADE IT HERE");
+  //console.log( iOS );
+  //if(iOS || this.unlocked)
+  //  return;
+//console.log("MADE IT HERE!")
+  // create empty buffer and play it
+  var buffer = audio.ctx.createBuffer(1, 1, 22050);
+  var source = audio.ctx.createBufferSource();
+  source.buffer = buffer;
+  source.connect(audio.ctx.destination);
+  source.start(0);
+  //console.log("MADE IT HERE omg ")
+  // by checking the play state after some time, we know if we're really unlocked
+  setTimeout(function() {
+    if((source.playbackState === source.PLAYING_STATE || source.playbackState === source.FINISHED_STATE)) {
+   //   console.log("MADE IT HERE YAYY")
+      isUnlocked = true;
+    }
+  }, 100);
+}
+
+
+
+    var loader = new THREE.TextureLoader();//
+    // load a texture, set wrap mode to repeat
+var texture;
+var textTexture;
+
+var flower1, flower2,flower3,flower4;
+
+
+
+loader.load( "flowers/flower1.png" , function ( t ) {
+    flower1 = t;
+    console.log("hello");
+    onLoad();
+});
+loader.load( "flowers/flower2.png" , function ( t ) {
+    flower2 = t;
+    console.log("hello");
+    onLoad();
+});
+loader.load( "flowers/flower3.png" , function ( t ) {
+    flower3 = t;
+    console.log("hello");
+    onLoad();
+});
+loader.load( "flowers/flower4.png" , function ( t ) {
+    flower4 = t;
+    console.log("hello");
+    onLoad();
+});
+
+loader.load( "prismaticClean.png" ,
+// onLoad callback
+  function ( t ) {
+    textTexture = t;
+    onLoad();
+  },
+);
+
+
+function onLoad(){
+  loaded += 1;
+  console.log( loaded );
+  console.log( neededToLoad );
+  if( loaded == neededToLoad ){
+    init();
+    animate();
+  }
+}
+
+
+
+    function init(){
+      console.log( texture );
+
+
+  // Makes a buffer for playing sounds! 
+        for( var i = 0; i < 20; i++ ){
+          var g = audio.buffers.pure.buffer;
+          audio.gainNodes[i] = audio.ctx.createGain();
+          audio.gainNodes[i].connect( audio.gain );
+          audio.playbackBuffers[i] = new BufferedAudio( g , audio.ctx , audio.gainNodes[i] , false );
+        }
+      /*
+
+
+         Default threejs stuff!
+
+      */
+      scene = new THREE.Scene();
+
+      var ar = window.innerWidth / window.innerHeight;
+
+      camera = new THREE.PerspectiveCamera( 50, ar , 1, 1000 );
+      camera.position.z = 100;
+     // camera.add( listener );
+
+      renderer = new THREE.WebGLRenderer();
+      renderer.setSize( window.innerWidth, window.innerHeight );
+
+
+      var geo = new THREE.PlaneGeometry( 100000 , 100000 );
+      var mat = new THREE.MeshNormalMaterial({side: THREE.DoubleSide});
+      intersectionPlane = new THREE.Mesh( geo , mat );
+      intersectionPlane.visible = false;
+      scene.add( intersectionPlane )
+
+      document.body.appendChild( renderer.domElement );
+
+      
+
+
+      page = new THREE.Mesh( new THREE.PlaneGeometry(1,1), mat );
+
+      scene.add( page );
+
+
+      /*
+
+         Object Control stuff!!!!
+
+      */ 
+
+
+      SizePage();
+      //page.visible = false;
+
+      objectControls = new ObjectControls( camera );
+
+      for( var i = 0; i < startPoints.length; i++ ){
+        var color = new THREE.Color().setHSL( i*.3, 1, .8);
+       var light = new THREE.PointLight( color.getHex(), 1, 4000 );
+        light.position.copy( startPoints[i] );//.set( 50, 50, 50 );
+        light.position.z += 20;
+        scene.add( light );
+        lights[i]= light;
+        //light.color = new THREE.Color().setHSL( 1, 1, .8);
+      }
+
+
+      var hoverMaterial     = new THREE.MeshBasicMaterial({color:0xffffff,shininess:10000,map:flower1,transparent:true,depthTest:false});
+      var neutralMaterial   = new THREE.MeshBasicMaterial({color:0xffffff,shininess:100,map:flower1,transparent:true,depthTest:false});
+      var selectedMaterial  = new THREE.MeshBasicMaterial({color:0xffffff,shininess:10000,map:flower1,transparent:true,depthTest:false});//new THREE.MeshBasicMaterial({color:0x55ff88});
+
+
+
+
+      var geo = new THREE.PlaneGeometry( 100 /2, 27.5/2 );
+      var mat = new THREE.MeshBasicMaterial({
+                        color:0xffffff,
+                        shininess:1,
+                        map:textTexture,
+                        //alphaTest:.5,
+                        transparent:true,
+                        opacity:.7,
+                        blending:THREE.AdditiveBlending,
+                        depthTest:false
+                      });
+      textMesh = new THREE.Mesh( geo , mat );
+      textMesh.position.z = 60;
+      //intersectionPlane.visible = false;
+      scene.add( textMesh )
+
+
+      var geo = new THREE.PlaneGeometry( 10 , 10);
+
+      for( var i = 0; i < 200; i++ ){
+
+        var lineID = Math.floor( Math.random() * 4);
+
+        var randLine = Math.random();
+        var rand = Math.random();
+        var lineTotal=0;
+        var lineID = 0;
+
+        for( var j = 0; j< pointLengths.length; j++){
+          lineTotal += pointLengths[j];
+          //console.log( lineTotal);
+          //console.log( rand );
+          if( rand < lineTotal ) break;
+          lineID += 1;
+        }
+
+
+        var rand = Math.random();
+        //console.log( rand );
+
+        var sp = startPoints[lineID];
+        var ep = endPoints[lineID];
+
+        var pos = new THREE.Vector3();
+
+        v1.copy( sp );
+        v2.copy( ep );
+        v1.sub( ep );
+        v1.multiplyScalar( rand );
+        v1.add( v2 );
+        pos.copy( v1);//lerpVectors( sp , ep , rand );
+
+
+        flowerTextures = [flower1,flower2,flower3,flower4];
+        var v = Math.floor( Math.random() * 4);
+        console.log( v);
+
+        var texture = flowerTextures[ Math.floor( Math.random() * 4)];
+
+        console.log( texture );
+        var hoverMaterial     = new THREE.MeshBasicMaterial({color:0xffffff,shininess:10000,map:texture,transparent:true,depthTest:false});
+        var neutralMaterial   = new THREE.MeshBasicMaterial({color:0xffffff,shininess:100,map:texture,transparent:true,depthTest:false});
+        var selectedMaterial  = new THREE.MeshBasicMaterial({color:0xffffff,shininess:10000,map:texture,transparent:true,depthTest:false});
+        var mesh = new THREE.Mesh( geo , neutralMaterial );
+
+        mesh.hoverMaterial    = hoverMaterial;
+        mesh.neutralMaterial  = neutralMaterial;
+        mesh.selectedMaterial = selectedMaterial;
+
+        mesh.selected = false;
+
+        mesh.scale.multiplyScalar( 1 + 2*Math.random());
+
+        mesh.hoverOver = function(  val ){
+
+
+        //  console.log( val );
+          this.material = this.hoverMaterial;
+          this.materialNeedsUpdate = true;
+          //this.rotation.x += .1;
+
+            v1.copy( val.mouse );
+            v2.copy( val.oldMouse );
+            this.touchForce.subVectors(v1, v2 );
+            this.touchForce.multiplyScalar(20);
+          intersectionPlane.position.copy( this.position );
+
+          //console.log(audio.buffers)
+          //sound.setVolume( 0.5 );
+          var b = notes[Math.floor(Math.random() * notes.length)].buffer;
+
+          if( Math.random() > .4 ) audio.play(b,1,1);
+
+
+        }.bind( mesh );
+
+
+        mesh.hoverOut = function(){
+
+          if( this.selected ){
+            this.material = this.selectedMaterial;
+            this.materialNeedsUpdate = true;
+          }else{
+            this.material = this.neutralMaterial;
+            this.materialNeedsUpdate = true;
+          }
+
+            this.touchForce.x = 0;
+            this.touchForce.y = 0;
+            this.touchForce.z = 0;
+
+
+        }.bind( mesh );
+
+        mesh.select = function(){
+
+          this.selected = true;
+          this.material = this.selectedMaterial;
+          this.materialNeedsUpdate = true;
+    
+            this.touchForce.x = 0;
+            this.touchForce.y = 0;
+            this.touchForce.z = 0;
+
+          intersectionPlane.position.copy( this.position );
+        }
+
+        mesh.deselect = function(){
+
+          this.selected = false;
+          this.material = this.neutralMaterial;
+          this.materialNeedsUpdate = true;
+
+            this.touchForce.x = 0;
+            this.touchForce.y = 0;
+            this.touchForce.z = 0;
+
+        }
+
+          mesh.update = function(){
+
+  
+          var raycaster = objectControls.raycaster;
+          var i = raycaster.intersectObject( intersectionPlane );
+
+          if( !i[0] ){ 
+            console.log( 'something is terribly wrong' );
+          }else{
+            v1.copy( i[0].point );
+            v2.copy( this.position );
+            this.touchForce.subVectors(v1, v2 );
+          }
+
+        }.bind( mesh );
+
+
+        v1.x = (Math.random() -.5 ) * 10;
+        v1.y = (Math.random() -.5 ) * 10;
+        v1.z = (Math.random() -.5 ) * 20;
+        v1.add(pos);
+
+        mesh.position.copy( v1);
+        scene.add( mesh );
+
+        mesh.originalPosition = new THREE.Vector3().copy(mesh.position);
+
+        mesh.force = new THREE.Vector3();
+        mesh.touchForce = new THREE.Vector3();
+        mesh.velocity = new THREE.Vector3();
+        mesh.velocity.x = 1.1;
+       
+        flowers.push( mesh);
+
+        objectControls.add( mesh );
+
+      }
+
+      clock.start();
+
+    }
+
+    function animate(){
+      requestAnimationFrame( animate );
+      updatePhysics();
+      updateLights();
+      
+      objectControls.update();
+
+      renderer.render( scene , camera );
+
+    }
+
+    function updateLights(){
+
+      for( var i = 0; i < lights.length; i++ ){
+        light = lights[i];
+        light.color = new THREE.Color().setHSL( Math.sin((4+(Math.sin(i*10)))/8 * clock.getElapsedTime()), 1, .8);
+      }
+    }
+
+    function updatePhysics(){
+
+     // console.log( clock.getElapsedTime() );
+      for( var i = 0; i < flowers.length; i++ ){
+        var f = flowers[i];
+        
+        v1.copy(f.position);
+        v1.multiplyScalar(-1);
+        v2.copy(f.originalPosition);
+        v2.multiplyScalar(1);
+
+
+        f.force = new THREE.Vector3().addVectors( v1 , v2);
+        f.force.add( f.touchForce );
+
+        v2.x = 1.1*Math.sin(clock.getElapsedTime() * (3+ Math.sin(i)));
+        v2.y = 1.1*Math.sin(clock.getElapsedTime() * (3+ Math.sin(i*31+100)));
+        v2.z = 0;
+        f.force.add( v2 );
+
+
+        f.velocity.add( f.force.multiplyScalar(.1) );
+        f.position.add( f.velocity );
+        f.velocity.multiplyScalar( .8);
+
+
+        v2.copy(f.velocity );
+        v2.add( new THREE.Vector3(0,0,-2));
+        v1.copy( f.position );
+        v1.sub( v2 );
+        f.lookAt(v1 );
+      }
+    }
+
+
+function SizePage(){
+
+
+  var fov = ( camera.fov / 360 )  * Math.PI;
+ // tan( fov ) = Y / 1000
+  //this.body.scale.x = 1000 * camera.aspect
+  //
+  var margin = 10;
+  //
+  var fullY = 100 * Math.tan( fov) * 2
+  page.scale.y = fullY - margin;
+  page.scale.x = fullY * camera.aspect - margin;
+
+
+
+  page.updateMatrix();
+
+ /* var bodyTmp = this.body.clone();
+  bodyTmp.position.copy( this.section.params.cameraPosition );
+  bodyTmp.lookAt( this.section.params.lookPosition );
+  G.v1.copy( this.section.params.cameraPosition );
+  G.v1.sub( this.section.params.lookPosition );
+  G.v1.normalize();
+  G.v1.multiplyScalar( -1000 );
+  bodyTmp.position.add( G.v1 );
+  bodyTmp.updateMatrix();*/
+
+
+
+
+  var lineGeo = new THREE.Geometry();
+
+
+  var s = page.scale;
+
+  var v1 = new THREE.Vector3( -1 / 2 , -1 / 2 , 0 );
+  var v2 = new THREE.Vector3( -1 / 2 ,  1 / 2 , 0 );
+
+  lineGeo.vertices.push( v1 );
+  lineGeo.vertices.push( v2 );
+
+  startPoints.push( v1 );
+  endPoints.push(   v2 );
+
+  var v1 = new THREE.Vector3( -1 / 2 , 1 / 2 , 0 );
+  var v2 = new THREE.Vector3( 1 / 2 ,  1 / 2 , 0 );
+
+  lineGeo.vertices.push( v1 );
+  lineGeo.vertices.push( v2 );
+
+  startPoints.push( v1 );
+  endPoints.push(   v2 );
+
+  var v1 = new THREE.Vector3(  1 / 2 ,  1 / 2 , 0 );
+  var v2 = new THREE.Vector3(  1 / 2 , -1 / 2 , 0 );
+
+  lineGeo.vertices.push( v1 );
+  lineGeo.vertices.push( v2 );
+
+  startPoints.push( v1 );
+  endPoints.push(   v2 );
+   
+  var v1 = new THREE.Vector3(   1 / 2 , -1 / 2 , 0 );
+  var v2 = new THREE.Vector3(  -1 / 2 , -1 / 2 , 0 );
+
+  lineGeo.vertices.push( v1 );
+  lineGeo.vertices.push( v2 );
+
+  startPoints.push( v1 );
+  endPoints.push(   v2 );
+
+
+  var total = 0;
+  for( var i = 0; i < startPoints.length; i++ ){
+
+    startPoints[i].applyMatrix4( page.matrix );
+    endPoints[i].applyMatrix4( page.matrix );
+    v3 = new THREE.Vector3().subVectors( endPoints[i] , startPoints[i] );
+    pointLengths[i] = v3.length();
+    total += v3.length();
+    console.log(total);
+  }
+
+  for( var i = 0; i < startPoints.length; i++ ){
+
+
+    pointLengths[i] *= 1/total;
+    console.log( pointLengths[i]);
+  }
+
+ 
+}
+
+
+  </script>
+
+
+
+
+</body>
+<html>

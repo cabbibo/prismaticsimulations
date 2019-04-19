@@ -1,0 +1,49 @@
+.jumbotron{
+	//background: url( 'assets/together.png');
+	background-size: 100% auto;
+	background-position: 50% 50%;
+	background:#fff;
+
+}
+
+body{
+		background: #fff;
+}
+
+.container{
+
+	background: #fff;
+	//color:#fff;
+
+}
+.jumbotron .container{
+	background: none;
+	//color:#fff;
+}
+
+.col-md-6{
+	padding-bottom: 30px;
+}
+
+.images img{
+
+	width:100%;
+
+}
+
+.row h3{
+
+	border-bottom: 1px solid white;
+	padding:10px;
+
+}
+
+.scrolling-wrapper {
+  overflow-x: scroll;
+  overflow-y: hidden;
+  white-space: nowrap;
+}
+  .card {
+    width:20%;
+    display: inline-block;
+  }
