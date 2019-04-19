@@ -472,6 +472,10 @@ nav a:hover{
   position:absolute;
 }
 
+#press{
+  padding-bottom:100px;
+}
+
 .pressLeft{
   width:50%;
   float:left;
