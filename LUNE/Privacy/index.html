@@ -1,0 +1,195 @@
+<html>
+<head>
+<meta name="google-site-verification" content="7jjbb1CQGSVJnfAEk9IrkAM5_iUi8pDVmo8zczv6a2I" />
+  <style>
+ html{
+  color:#fff;
+  background:#000;
+  font-family:"GeoSans";
+  background-repeat:no-repeat;
+  padding:20px;
+  font-size: 30px;
+  text-align:center;
+
+}
+@font-face {
+  font-family: "GeoSans";
+  src: url("../../assests/GeosansLight.ttf");
+}
+a{
+  color:white;
+  text-decoration: none;
+}
+a:hover{
+  text-decoration: underline;
+}
+p{
+  padding:10px;
+  margin-left: 400px;
+  margin-right: 400px;
+}
+
+canvas { width: 100%; height: 100% }
+</style>
+</head>
+
+
+<body style="margin:0px">
+
+  <h1> FACE! PLANT! </h1>
+  <div id="test"></div>
+  <h1> Privacy Policy</h1>
+<p>Prismatic Simulations LLC built the FACE! PLANT! app as a Commercial app. This SERVICE is provided by Prismatic Simulations LLC and is intended for use as is.</p>
+
+<p>This page is used to inform visitors regarding our policies with the collection, use, and disclosure of Personal Information if anyone decided to use our Service.</p>
+
+<p>If you choose to use our Service, then you agree to the collection and use of information in relation to this policy. The Personal Information that we collect is used for providing and improving the Service. We will not use or share your information with anyone except as described in this Privacy Policy.</p>
+
+<p>The terms used in this Privacy Policy have the same meanings as in our Terms and Conditions, which is accessible at FACE! PLANT! unless otherwise defined in this Privacy Policy.</p>
+
+<h1>Information Collection and Use</h1>
+
+<p>For a better experience, while using our Service, we may require you to provide us with certain personally identifiable information, including but not limited to Camera Usage, Face Tracking. The information that we request will be retained by us and used as described in this privacy policy.</p>
+
+<p>The app does use third party services that may collect information used to identify you.</p>
+
+<p> Unity's Privacy Policy : https://unity3d.com/legal/privacy-policy </p>
+
+<h1>Log Data</h1>
+
+<p>We want to inform you that whenever you use our Service, in a case of an error in the app we collect data and information (through third party products) on your phone called Log Data. This Log Data may include information such as your device Internet Protocol (“IP”) address, device name, operating system version, the configuration of the app when utilizing our Service, the time and date of your use of the Service, and other statistics.</p>
+
+<h1>Cookies</h1>
+
+<p>Cookies are files with a small amount of data that are commonly used as anonymous unique identifiers. These are sent to your browser from the websites that you visit and are stored on your device's internal memory.</p>
+
+<p>This Service does not use these “cookies” explicitly. However, the app may use third party code and libraries that use “cookies” to collect information and improve their services. You have the option to either accept or refuse these cookies and know when a cookie is being sent to your device. If you choose to refuse our cookies, you may not be able to use some portions of this Service.</p>
+
+<h1>Service Providers</h1>
+<p>We may employ third-party companies and individuals due to the following reasons:</p>
+
+To facilitate our Service;
+To provide the Service on our behalf;
+To perform Service-related services; or
+To assist us in analyzing how our Service is used.
+We want to inform users of this Service that these third parties have access to your Personal Information. The reason is to perform the tasks assigned to them on our behalf. However, they are obligated not to disclose or use the information for any other purpose.
+
+<h1>Security</h1>
+
+<p>We value your trust in providing us your Personal Information, thus we are striving to use commercially acceptable means of protecting it. But remember that no method of transmission over the internet, or method of electronic storage is 100% secure and reliable, and we cannot guarantee its absolute security.</p>
+
+
+
+<h1>Children’s Privacy</h1>
+
+<p>These Services do not address anyone under the age of 13. We do not knowingly collect personally identifiable information from children under 13. In the case we discover that a child under 13 has provided us with personal information, we immediately delete this from our servers. If you are a parent or guardian and you are aware that your child has provided us with personal information, please contact us so that we will be able to do necessary actions.</p>
+
+<h1>Changes to This Privacy Policy</h1>
+
+<p>We may update our Privacy Policy from time to time. Thus, you are advised to review this page periodically for any changes. We will notify you of any changes by posting the new Privacy Policy on this page. These changes are effective immediately after they are posted on this page.</p>
+
+<h1>Contact Us</h1>
+
+<p>If you have any questions or suggestions about our Privacy Policy, do not hesitate to contact us.</p>
+  <a href="mailto:hello@prismaticsimulations.com"> Say Hello </a>
+
+</body>
+
+  <script src="../../three.min.js"></script>
+  <script src="../../jquery.min.js"></script>
+    <script src="../../lib/ShaderLoader.js"></script>
+<script>
+
+var G = {}
+G.shaders = new ShaderLoader('../../shaders');
+
+
+      // For text
+      G.shaders.load( 'vs-main' , 'main' , 'vertex'    );
+      G.shaders.load( 'fs-plant' , 'main' , 'fragment'  );
+
+      G.shaders.shaderSetLoaded = function(){
+        init();
+        animate();
+      }
+
+
+      var clock = new THREE.Clock();
+      var scene = new THREE.Scene();
+var camera = new THREE.PerspectiveCamera( 75, 1,0.1, 1000 );
+
+var uniforms = {
+
+    dT:       { type:"f"  , value : 0             },
+    time:     { type:"f"  , value : 0             },
+
+    iModelMat:{ type:"m4" , value: new THREE.Matrix4() },
+}
+
+//var renderer = new THREE.WebGLRenderer();
+//renderer.setSize( window.innerWidth, window.innerHeight );
+
+camera.position.z = 8;
+
+      function init(){
+
+
+
+        //camera = new THREE.PerspectiveCamera( 90, 1, 1, 2000 );
+        //camera.position.set( 0.0, 0,10 );
+        //scene = new THREE.Scene();
+        
+       // scene.background
+
+        var mat = new THREE.ShaderMaterial( {
+            uniforms: uniforms,
+            vertexShader: G.shaders.vs.main,
+            fragmentShader: G.shaders.fs.main,            
+           // side:THREE.DoubleSide
+        });
+
+      plane = new THREE.Mesh( new THREE.PlaneGeometry(10, 10,1,1), mat);
+
+  //scene.backgound = new THREE.Color( 0xff0000 );
+        scene.add(plane);
+
+        renderer = new THREE.WebGLRenderer( { antialias: true } );
+        renderer.setPixelRatio( window.devicePixelRatio );
+        renderer.setSize( 400, 400 );
+
+        container = document.getElementById("test");
+        container.appendChild( renderer.domElement );
+//document.body.appendChild( renderer.domElement );
+
+
+
+
+      }
+
+      function animate(){
+
+        uniforms.dT.value = clock.getDelta();
+        uniforms.time.value += uniforms.dT.value;//clock.getDelta();
+        uniforms.iModelMat.value.getInverse( plane.matrixWorld );
+
+        camera.position.x =9* Math.sin( Math.sin(uniforms.time.value) * .7 );
+        camera.position.z =9 * Math.cos( Math.sin(uniforms.time.value) * .7  );
+
+        camera.position.y =1 * Math.sin( Math.sin(uniforms.time.value) * 1  );
+
+
+        camera.lookAt( scene.position );
+        //plane.position.add(camera.forward);
+        var vector = new THREE.Vector3( 0, 0, -1 );
+        vector.applyQuaternion( camera.quaternion );
+        plane.position.addVectors(camera.position,vector);
+
+        plane.lookAt( camera.position );        
+
+        renderer.render(scene,camera); 
+        requestAnimationFrame(animate);
+      } 
+
+</script>
+
+<html>
