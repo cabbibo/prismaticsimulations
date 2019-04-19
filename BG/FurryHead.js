@@ -290,9 +290,9 @@ var FURRY_HEAD_GEO , FURRY_HEAD_POS;
       point.multiplyScalar( Math.random() );
       point.add( vertex1 );*/
 
-      data[ i ]     = 2000+posX;
+      data[ i ]     = 100+posX;
       data[ i + 1 ] = 100+posZ;
-      data[ i + 2 ] = 100+(1 - (y/size))*100;
+      data[ i + 2 ] = 0+(1 - (y/size))*100;
       data[ i + 3 ] = 1;
 
     }
