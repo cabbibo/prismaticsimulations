@@ -43,7 +43,21 @@ body{
   overflow-y: hidden;
   white-space: nowrap;
 }
+
+
+
+.vidCard video
+{
+  height:400px;
+}
+
+.vidCard{
+
+  display: inline-block;
+}
   .card {
     width:20%;
     display: inline-block;
   }
+
+  

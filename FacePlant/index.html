@@ -46,13 +46,13 @@
 </head>
 <body>
 	
-	<div class="section-wrapper" id="toppy" style="height:100px;">
+	<div class="section-wrapper" id="toppy" style="height:120px;">
 		<div class="top-bar"></div>
 	    <section style="padding:10px">
 	    	<a href="https://PrismaticSimulations.com/FacePlant/">
 			 	<div class="logo">
-			 		<h1> Face! Plant! </h1>
-			 		<!--<img src="share.jpg">-->
+			 		
+			 		<img src="face!plant!-colorlogo.jpg">
 			 		<!-- 3D computer applications and video games<span style="font-size:10px; margin-top: -2px; margin-left: 3px; position: absolute">™</span> -->
 			 	</div>
 			 </a>
@@ -69,7 +69,10 @@
 				
 				<section id="iphone" >
 						<img src="IPhone_X.png" style="margin:0px;width:100%; height:100%;"></img>
-						<video autoplay=true loop=true src="testRecording1.mp4" style="margin:0px;width:100%; height:100%;"></video>
+						<video id="trailerVideo" autoplay=true  src="testRecording1.mp4" style="margin:0px;width:100%; height:100%;">
+							
+
+						</video>
 				
 					</section>
 
@@ -237,5 +240,44 @@
 
 
 	<script>w3.includeHTML()</script>
+	<script>
+		
+
+
+var videos = [
+     "vids/f_1.mp4",
+     "vids/f_2.mp4",
+     "vids/f_3.mp4",
+     "vids/f_4.mp4",
+     "vids/f_5.mp4",
+     "vids/f_6.mp4",
+     "vids/f_7.mp4",
+     "vids/f_8.mp4",
+  ];
+
+var videoId =0;
+var elemVideo = document.getElementById('trailerVideo');
+
+elemVideo.onEnded = function(){
+	console.log("YAA");
+}
+elemVideo.addEventListener('ended',play_next,false);
+
+
+function play_next(){
+
+		videoId = Math.floor(Math.random()*videos.length)
+    elemVideo.pause();
+    console.log("hi");
+		elemVideo.setAttribute('src', videos[videoId]); 
+		elemVideo.load();
+	    elemVideo.play();
+    
+
+}
+
+play_next();
+
+	</script>
 
 </body></html>
