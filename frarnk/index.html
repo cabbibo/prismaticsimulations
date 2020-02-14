@@ -12,7 +12,6 @@
     </style>
   </head>
   <body>
-    <link rel="manifest" href="manifest.json">
 
     <div id="container"></div>
  <script id="vertexShader" type="x-shader/x-vertex">
@@ -73,14 +72,14 @@
         vec4 heightCol = texture2D(_HeightTexture, fUV * 2. );
 
         vec4 color = hair;//vec4(d * .5 + .5 , 0., 1.);//font;
-        if( color.x > .6 - 1.*height  * heightCol.x && font.a < .7){ discard; }
+        if( color.x > .6 - 1.*height  * heightCol.x && font.a < .9){ discard; }
 
         vec4 c = texture2D(_ColorMap, vec2(height*3.)); 
         color = c * heightCol.x;
 
-        if( font.a > .7){ color = texture2D(_ColorMap, vec2(1.-height*3.));}
+        if( font.a > .9){ color = texture2D(_ColorMap, vec2(1.-height*3.));}
        // color = vec4(1.);// * color.a; //vec4(sin( height * 20.),0.,0.,1.) * (color.x);
-        gl_FragColor = color * min( height * height * 20. , 1.);
+        gl_FragColor = color;
       }
 
     </script>
@@ -112,9 +111,9 @@ var SCREEN_WIDTH = window.innerWidth;
 
         var textureLoader = new THREE.TextureLoader();
         var texture1 = textureLoader.load( "dotTexture.jpg" );
-        var texture2 = textureLoader.load( "text.png" );
+        var texture2 = textureLoader.load( "frarnk.png" );
         var texture3 = textureLoader.load( "height.png" );
-        var texture4 = textureLoader.load( "color3.png" );
+        var texture4 = textureLoader.load( "color.png" );
         texture1.wrapS = texture1.wrapT = THREE.RepeatWrapping;
         texture3.wrapS = texture3.wrapT = THREE.RepeatWrapping;
         texture4.wrapS = texture4.wrapT = THREE.RepeatWrapping;
@@ -165,8 +164,7 @@ var SCREEN_WIDTH = window.innerWidth;
       }
 
       function onWindowResize() {
-        
-        camera.aspect = window.innerWidth / window.innerHeight;
+camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize( window.innerWidth, window.innerHeight );
 
