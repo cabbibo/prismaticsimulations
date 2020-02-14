@@ -58,27 +58,31 @@
         vec4 fontU = texture2D(_FontTexture,vUv + vec2(0.,.0001));
         vec4 fontD = texture2D(_FontTexture,vUv - vec2(0.,.0001));
 
-        vec2 d = normalize(vec2(( fontL.a - fontR.a ) , (fontU.a - fontD.a))) * font.a;
+        vec2 d = normalize(vec2(( fontL.a - fontR.a ) , (fontU.a - fontD.a))) * (1.-font.a);
 
         vec2 fUV = vUv;
 
-        if( font.a > 0.01 ){
-          fUV += d* .5 * height;
+        if( (1.-font.a) > 0.1){
+          fUV -= d*d*d* 4.3 * height;
         }
 
         fUV.x += sin( height * 8.  + time + fUV.x * 10. + fUV.y * 10.) * .003 ;
         fUV.y += sin( height * 5.  + time * 1.3 + 10. + fUV.x * 10. + fUV.y * 10.) * .003;
-        if( font.a > .8){ }
+        if( (1.-font.a) > .8){ }
         vec4 hair = texture2D(_Texture, fUV * 2. );
         vec4 heightCol = texture2D(_HeightTexture, fUV * 2. );
 
         vec4 color = hair;//vec4(d * .5 + .5 , 0., 1.);//font;
-        if( color.x > .6 - 1.*height  * heightCol.x && font.a < .7){ discard; }
+
+        float cutoffVal =  font.a;
+         cutoffVal -= sin( vUv.x * 20. + time) * .01;
+        cutoffVal -= sin( vUv.y * 24. + time) * .01;
+        if( color.x > .6 - 1.*height  * heightCol.x && cutoffVal > .5){ discard; }
 
         vec4 c = texture2D(_ColorMap, vec2(height*3.)); 
         color = c * heightCol.x;
 
-        if( font.a > .7){ color = texture2D(_ColorMap, vec2(1.-height*3.));}
+        if( cutoffVal < .5){ color = texture2D(_ColorMap, vec2(1.-height*3. +  (vUv.x + vUv.y) * .8 + .7));}
        // color = vec4(1.);// * color.a; //vec4(sin( height * 20.),0.,0.,1.) * (color.x);
         gl_FragColor = color * min( height * height * 20. , 1.);
       }
@@ -112,7 +116,7 @@ var SCREEN_WIDTH = window.innerWidth;
 
         var textureLoader = new THREE.TextureLoader();
         var texture1 = textureLoader.load( "dotTexture.jpg" );
-        var texture2 = textureLoader.load( "text.png" );
+        var texture2 = textureLoader.load( "output3.png" );
         var texture3 = textureLoader.load( "height.png" );
         var texture4 = textureLoader.load( "color3.png" );
         texture1.wrapS = texture1.wrapT = THREE.RepeatWrapping;
@@ -126,7 +130,7 @@ var SCREEN_WIDTH = window.innerWidth;
         scene = new THREE.Scene();
         
 
-        var geometry = new THREE.PlaneGeometry(2  ,2 );
+        var geometry = new THREE.PlaneGeometry(3  ,3 );
 
         uniforms = {
           "time": { value: 1.0 },
