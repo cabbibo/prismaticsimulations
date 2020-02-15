@@ -5,16 +5,111 @@
 
 <html>
   <head>
-    <title>My first three.js app</title>
+
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width">
+    <title>blarp</title>
     <style>
-      body { margin: 0; }
-      canvas { display: block; }
+@font-face {
+  font-family: 'Poppins';
+  src: url('Poppins-Black.ttf');  
+}
+      body{margin: 0px;font-family:'Poppins';}
+      #container{
+        position:fixed;
+        height:50px;
+      }
+
+      h1{
+        z-index: 100;
+        color:#fff;
+        position:relative;
+      }
+
+      p{
+        font-family:'Poppins';
+        position: absolute;
+        z-index: 100;
+      }
+
+      #blank{
+        position:relative;
+        height:120%;
+        //background: #f00;
+      }#blank2{
+        position:relative;
+        height:80%;
+        //background: #f00;
+      }
+
+
+      #cool{
+        position:relative;
+       // background: #000;
+        color:#fff;
+        font-size:30px;
+        text-align :center;
+        padding:50px;
+      }
+
+      #available{
+        position:relative;
+        //background: #000;
+        color:#fff;
+        font-size:30px;
+        text-align :center;
+        padding:50px;
+      }
+
+      #iphone{
+
+        left:50%;
+  border-radius: 50px; 
+
+  margin-left:-150px;
+  width:300px; 
+  height:600px; 
+  position:relative;
+  z-index: 10;
+}
+
+#isss{
+  z-index: 20;
+  position:relative;
+}
+
+#trailerVideo{
+  margin-top:-600px;
+  z-index: -10;
+}
+
     </style>
   </head>
   <body>
     <link rel="manifest" href="manifest.json">
 
     <div id="container"></div>
+
+    <p>
+      <div id="blank"></div>
+
+      <div id="cool">
+        An iOS game full of physics and delight
+        <br/><br/><br/><br/><br/><br/>
+      </div>
+
+          <div id="iphone" >
+            <img id="isss" src="../FacePlant/IPhone_X.png" style="margin:0px;width:100%; height:100%;"></img>
+            <video id="trailerVideo" autoplay=true  src="blarp20.mp4" style="border-radius:30px; padding:10%;padding-top:20%;padding-bottom:20%; width:80%; height:80%;background: #000">
+
+            </video>
+        
+          <div>
+<div id="blank2"></div>
+      <div id="available">
+        Coming soon to the app store!
+      </div>
+  </p>
  <script id="vertexShader" type="x-shader/x-vertex">
 
 
@@ -42,49 +137,61 @@
       varying float height;
 
       uniform float time;
+      uniform float ratio;
       uniform sampler2D _Texture;
       uniform sampler2D _FontTexture;
       uniform sampler2D _HeightTexture;
       uniform sampler2D _ColorMap;
 
+      uniform float scrollVal;
+
       void main() {
 
+      vec2 uv = vUv * 4. - 1.5;
 
-       // vUv.x += sin( mvPos.z * 20.  + time + mvPos.x) * .01;
-        vec4 font = texture2D(_FontTexture,vUv);
 
-        vec4 fontL = texture2D(_FontTexture,vUv + vec2(.0001,0.));
-        vec4 fontR = texture2D(_FontTexture,vUv - vec2(.0001,0.));
-        vec4 fontU = texture2D(_FontTexture,vUv + vec2(0.,.0001));
-        vec4 fontD = texture2D(_FontTexture,vUv - vec2(0.,.0001));
+       // vUv.x += sin( mvPos.z * 20.  + time + mvPos.x) ;
 
-        vec2 d = normalize(vec2(( fontL.a - fontR.a ) , (fontU.a - fontD.a))) * (1.-font.a);
 
-        vec2 fUV = vUv;
+        vec2 fontUV = uv+ vec2(0. , -scrollVal *1.5);
+        vec4 font = texture2D(_FontTexture,fontUV);
 
-        if( (1.-font.a) > 0.1){
-          fUV -= d*d*d* 4.3 * height;
+        vec4 fontL = texture2D(_FontTexture,fontUV + vec2(.0001,0.));
+        vec4 fontR = texture2D(_FontTexture,fontUV - vec2(.0001,0.));
+        vec4 fontU = texture2D(_FontTexture,fontUV + vec2(0.,.0001));
+        vec4 fontD = texture2D(_FontTexture,fontUV - vec2(0.,.0001));
+
+        vec2 d = normalize(vec2(( fontL.a - fontR.a ) , (fontU.a - fontD.a))) * font.a;
+
+        vec2 fUV = uv * .5;
+
+        if( font.a > 0.1){
+          fUV += d*d*d* 4.3 * height;
         }
+
+
+
+
 
         fUV.x += sin( height * 8.  + time + fUV.x * 10. + fUV.y * 10.) * .003 ;
         fUV.y += sin( height * 5.  + time * 1.3 + 10. + fUV.x * 10. + fUV.y * 10.) * .003;
-        if( (1.-font.a) > .8){ }
+        if( font.a > .8){ }
         vec4 hair = texture2D(_Texture, fUV * 2. );
         vec4 heightCol = texture2D(_HeightTexture, fUV * 2. );
 
         vec4 color = hair;//vec4(d * .5 + .5 , 0., 1.);//font;
 
         float cutoffVal =  font.a;
-         cutoffVal -= sin( vUv.x * 20. + time) * .01;
-        cutoffVal -= sin( vUv.y * 24. + time) * .01;
-        if( color.x > .6 - 1.*height  * heightCol.x && cutoffVal > .5){ discard; }
+         cutoffVal -= sin( uv.x * 20. + time) * .01;
+        cutoffVal -= sin( uv.y * 24. + time) * .01;
+        if( color.x > .6 - 1.*height  * heightCol.x && cutoffVal < .5){ discard; }
 
-        vec4 c = texture2D(_ColorMap, vec2(height*3.)); 
-        color = c * heightCol.x;
+        vec4 c = texture2D(_ColorMap, vec2(height*6.)); 
+        color = c * heightCol.x * .6;
 
-        if( cutoffVal < .5){ color = texture2D(_ColorMap, vec2(1.-height*3. +  (vUv.x + vUv.y) * .8 + .7));}
+        if( cutoffVal > .5){ color = texture2D(_ColorMap, vec2(1.-height*6. +  (uv.x + uv.y) * .8 + .7));}
        // color = vec4(1.);// * color.a; //vec4(sin( height * 20.),0.,0.,1.) * (color.x);
-        gl_FragColor = color * min( height * height * 20. , 1.);
+        gl_FragColor = color * min( height * height * 200. , 1.);
       }
 
     </script>
@@ -116,7 +223,8 @@ var SCREEN_WIDTH = window.innerWidth;
 
         var textureLoader = new THREE.TextureLoader();
         var texture1 = textureLoader.load( "dotTexture.jpg" );
-        var texture2 = textureLoader.load( "output3.png" );
+        var texture2 = textureLoader.load( "titlesdf.png" );
+        var texture5 = textureLoader.load( "titlesdf.png" );
         var texture3 = textureLoader.load( "height.png" );
         var texture4 = textureLoader.load( "color4.png" );
         texture1.wrapS = texture1.wrapT = THREE.RepeatWrapping;
@@ -130,12 +238,17 @@ var SCREEN_WIDTH = window.innerWidth;
         scene = new THREE.Scene();
         
 
-        var geometry = new THREE.PlaneGeometry(3  ,3 );
+        var geometry = new THREE.PlaneGeometry(4  ,4 );
+
+        var ratio = .5 / 3;
 
         uniforms = {
           "time": { value: 1.0 },
+          "ratio": { value: ratio },
+          "scrollVal": { value: 0 },
           "_Texture" : { value : texture1 },
           "_FontTexture" : { value : texture2 },
+          "_FontTexture2" : { value : texture5 },
           "_HeightTexture" : { value : texture3 },
           "_ColorMap" : { value : texture4 }
         };
@@ -152,9 +265,9 @@ var SCREEN_WIDTH = window.innerWidth;
 
         var mesh;
 
-        for( var i = 0; i < 40; i++ ){
+        for( var i = 0; i < 20  ; i++ ){
           mesh = new THREE.Mesh( geometry, material );
-          mesh.position.z = i/40 * .3;
+          mesh.position.z = i/20 * .15;
           scene.add( mesh );
         }
 
@@ -178,15 +291,100 @@ var SCREEN_WIDTH = window.innerWidth;
 
       //
 
+
+      var scrollY = 0;
+      var scrollVel =0;
       function animate( timestamp ) {
 
+      var body = document.body,
+    html = document.documentElement;
+docHeight = Math.max( body.scrollHeight, body.offsetHeight, 
+                       html.clientHeight, html.scrollHeight, html.offsetHeight );
+   
+    
         requestAnimationFrame( animate );
-
-        uniforms[ "time" ].value = timestamp / 1000;
+        var scrolledAmount = document.scrollingElement.scrollTop / ( docHeight- window.innerHeight);
+         uniforms[ "time" ].value = timestamp / 1000;
+        uniforms[ "scrollVal" ].value = scrolledAmount;
 
         renderer.render( scene, camera );
 
+        scrollVel *= .9;
+        scrollY += scrollVel;
+
+        if( down ){
+          scrollVel -= .006 * (y -oY);
+        }
+
+
       }
+
+
+function isMobileDevice() {
+    return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
+};
+
+
+//if (!isMobileDevice()) {
+//document.body.addEventListener('mousedown',mousedown);
+//document.body.addEventListener('mousemove',mousemove);
+//document.body.addEventListener('mouseup',mouseup);
+//}else{
+//console.log("hmm");
+//document.body.addEventListener('touchstart',touchdown);
+//document.body.addEventListener('touchmove',touchmove);
+//document.body.addEventListener('touchend'  ,touchup);
+//}
+
+window.addEventListener('scroll' , scroll);
+function scroll( evt ){
+}
+
+
+var oY = 0;
+var y = 0;
+var down;
+function mousedown(evt){
+  down = true;
+  oY = evt.clientY;
+  
+  y = evt.clientY;
+}
+
+
+function mousemove(evt){
+  if( down == true ){
+    oY = y;
+    y = evt.clientY;
+    console.log( evt );
+  } 
+}
+
+function mouseup(evt){
+  down = false;
+}
+
+
+function touchdown(evt){
+  down = true;
+  console.log( evt.touches[0])
+  oY = evt.touches[0].clientY;
+  
+  y = evt.touches[0].clientY;
+}
+
+
+function touchmove(evt){
+  if( down == true ){
+    oY = y;
+    y = evt.touches[0].clientY;
+    console.log( evt );
+  } 
+}
+
+function touchup(evt){
+  down = false;
+}
     </script>
   </body>
 </html>
