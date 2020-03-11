@@ -14,7 +14,7 @@
   font-family: 'Poppins';
   src: url('Poppins-Black.ttf');  
 }
-      body{margin: 0px;font-family:'Poppins';}
+      body{margin: 0px;font-family:'Poppins';background:#000;}
       #container{
         position:fixed;
         height:50px;
@@ -83,6 +83,8 @@
   z-index: -10;
 }
 
+
+
     </style>
   </head>
   <body>
@@ -91,26 +93,25 @@
     <div id="container"></div>
 
     <p>
-      <div id="blank"></div>
 
       <div id="cool">
-        An iOS game full of physics and delight
-        <br/><br/><br/><br/><br/><br/>
+        <h1> blarp </h1>
+        An iOS game <br/>full of physics and delight
+        <br/>
       </div>
 
           <div id="iphone" >
             <img id="isss" src="../FacePlant/IPhone_X.png" style="margin:0px;width:100%; height:100%;"></img>
-            <video id="trailerVideo" autoplay=true  src="blarp20.mp4" style="border-radius:30px; padding:10%;padding-top:20%;padding-bottom:20%; width:80%; height:80%;background: #000">
+            <video id="trailerVideo" autoplay=true src="preview.mp4" style="border-radius:30px; padding:10%;padding-top:20%;padding-bottom:20%; width:80%; height:80%;background: #000">
 
             </video>
         
           <div>
-<div id="blank2"></div>
       <div id="available">
         Coming soon to the app store!
       </div>
   </p>
- <script id="vertexShader" type="x-shader/x-vertex">
+ <!--<script id="vertexShader" type="x-shader/x-vertex">
 
 
       varying vec2 vUv;
@@ -187,7 +188,7 @@
         if( color.x > .6 - 1.*height  * heightCol.x && cutoffVal < .5){ discard; }
 
         vec4 c = texture2D(_ColorMap, vec2(height*6.)); 
-        color = c * heightCol.x * .6;
+        color = 3.*c * heightCol.x * .6;
 
         if( cutoffVal > .5){ color = texture2D(_ColorMap, vec2(1.-height*6. +  (uv.x + uv.y) * .8 + .7));}
        // color = vec4(1.);// * color.a; //vec4(sin( height * 20.),0.,0.,1.) * (color.x);
@@ -238,7 +239,7 @@ var SCREEN_WIDTH = window.innerWidth;
         scene = new THREE.Scene();
         
 
-        var geometry = new THREE.PlaneGeometry(4  ,4 );
+        var geometry = new THREE.PlaneGeometry(1  ,1 );
 
         var ratio = .5 / 3;
 
@@ -265,9 +266,9 @@ var SCREEN_WIDTH = window.innerWidth;
 
         var mesh;
 
-        for( var i = 0; i < 20  ; i++ ){
+        for( var i = 0; i < 5 ; i++ ){
           mesh = new THREE.Mesh( geometry, material );
-          mesh.position.z = i/20 * .15;
+          mesh.position.z = i/5 * .05;
           scene.add( mesh );
         }
 
@@ -290,15 +291,13 @@ var SCREEN_WIDTH = window.innerWidth;
       }
 
       //
-
-
       var scrollY = 0;
       var scrollVel =0;
       function animate( timestamp ) {
 
       var body = document.body,
-    html = document.documentElement;
-docHeight = Math.max( body.scrollHeight, body.offsetHeight, 
+      html = document.documentElement;
+      docHeight = Math.max( body.scrollHeight, body.offsetHeight, 
                        html.clientHeight, html.scrollHeight, html.offsetHeight );
    
     
@@ -385,6 +384,6 @@ function touchmove(evt){
 function touchup(evt){
   down = false;
 }
-    </script>
+    </script>-->
   </body>
 </html>
